@@ -13,9 +13,8 @@ const DATA: &[isize] = &[
 
 fn main() {
 
-    'outer1: for i in 0..DATA.len() {
-        for j in i+1..DATA.len() {
-            let (x, y) = (DATA[i], DATA[j]);
+    'outer1: for (i, x) in DATA.iter().enumerate() {
+        for y in DATA.iter().skip(i) {
             if x + y == 2020 {
                 println!("{x}+{y} = {sum}, {x}*{y} = {product}", x = x, y = x, sum = x+y, product = x*y);
                 break 'outer1;
@@ -23,10 +22,9 @@ fn main() {
         }
     }
 
-    'outer2: for i in 0..DATA.len() {
-        for j in i+1..DATA.len() {
-            for k in j+1..DATA.len() {
-                let (x, y, z) = (DATA[i], DATA[j], DATA[k]);
+    'outer2: for (i, x) in DATA.iter().enumerate() {
+        for (j, y) in DATA.iter().skip(i).enumerate() {
+            for z in DATA.iter().skip(j) {
                 if x + y + z == 2020 {
                     println!("{x}+{y}+{z} = {sum}, {x}*{y}*{z} = {product}", x = x, y = x, z = z,
                              sum = x+y+z, product = x*y*z);

@@ -87,19 +87,28 @@ static VALIDATORS: Lazy<HashMap<&str, Validator>> = Lazy::new(|| {
     // - If in, the number must be at least 59 and at most 76.
     let re = Regex::new("^([0-9]+)(cm|in)$").unwrap();
     r.insert("hgt", Box::new(move |s| {
-        if let Some(cap) = re.captures(s) {
-            if let Ok(n) = cap[1].parse::<i32>() {
-                return match &cap[2] {
-                    "cm" => n >= 150 && n <= 193,
-                    "in" => n >= 59 && n <= 76,
-                    _ => false
-                }
-            } else {
-                false
-            }
-        } else {
-            false
-        }
+
+        // Pure functional approach
+        // re.captures(s).map(|cap| {
+        //     cap[1].parse::<i32>().map(|n| {
+        //         match &cap[2] {
+        //             "cm" if n >= 150 && n <= 193 => true,
+        //             "in" if n >= 59 && n <= 76 => true,
+        //             _ => false
+        //         }
+        //     }).unwrap_or(false)
+        // }).unwrap_or(false)
+
+        // Use errors to have a linear happy path
+        (|| -> anyhow::Result<bool> {
+            let cap = re.captures(s).ok_or(anyhow::anyhow!(""))?;
+            let n: i32 = cap[1].parse()?;
+            Ok(match &cap[2] {
+                "cm" => n >= 150 && n <= 193,
+                "in" => n >= 59 && n <= 76,
+                _ => false
+            })
+        })().unwrap_or(false)
     }));
 
     // hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
